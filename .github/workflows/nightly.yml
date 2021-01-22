@@ -10,26 +10,64 @@ on:
 jobs:
   compile:
     name: Compile
-    runs-on: macos-latest
+    runs-on: macos-11.0
+
     steps:
 
     - name: Download Shadowsocks-Rust latest tag
       shell: bash
-      working-directory: ${{runner.workspace}}
+      working-directory: ${{ runner.workspace }}
       # https://stackoverflow.com/questions/29780641/how-to-clone-latest-tag-in-a-git-repo
       run: |
         tag=$(git ls-remote --tags --exit-code --refs "https://github.com/shadowsocks/shadowsocks-rust.git" | sed -E 's/^[[:xdigit:]]+[[:space:]]+refs\/tags\/(.+)/\1/g' | tail -n1)
+        echo "ss_tag=$tag" >> $GITHUB_ENV
         echo "Selected tag: $tag"
         git clone --branch "$tag" --depth 1 --shallow-submodules --recurse-submodules "https://github.com/shadowsocks/shadowsocks-rust.git"
     
     - name: Install Rustup
       shell: bash
-      run: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+      run: | 
+        curl --proto '=https' --tlsv1.2 -sS https://sh.rustup.rs -o installRustUp.sh
+        sh installRustUp.sh -y
+        rustup update
       
     - name: Build release
       shell: bash
+      working-directory: ${{ runner.workspace }}
       run: |
+        # Usage: build_target [target_platform] [save_destination]
         function build_target {
-          target = $1
+          target=$1
+          save_to=$2
+          rustup target add $target
+          rustup update
+          pushd shadowsocks-rust
+          cargo build --bin sslocal --release --target $target
+          popd
+          cp shadowsocks-rust/target/$target/release/sslocal $save_to
         }
+        build_target x86_64-apple-darwin ./x86_64
+        build_target aarch64-apple-darwin ./arm64
+        lipo -create -output universal_sslocal x86_64 arm64
+
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ env.ss_tag }}
+        draft: false
+        prerelease: false
+
+    - name: Upload binaries to release
+      uses: svenstaro/upload-release-action@v2
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file: ./universal_sslocal
+        asset_name: sslocal
+        tag: ${{ env.ss_tag }}
+        overwrite: true
+        body: "Universal binary for both arm mac and x86 mac."
+
         
