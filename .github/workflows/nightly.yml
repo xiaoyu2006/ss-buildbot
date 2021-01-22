@@ -1,0 +1,35 @@
+name: nightly
+
+on:
+  push:
+    branches:
+      - master
+  schedule:
+    - cron:  '0 0 * * *'
+
+jobs:
+  compile:
+    name: Compile
+    runs-on: macos-latest
+    steps:
+
+    - name: Download Shadowsocks-Rust latest tag
+      shell: bash
+      working-directory: ${{runner.workspace}}
+      # https://stackoverflow.com/questions/29780641/how-to-clone-latest-tag-in-a-git-repo
+      run: |
+        tag=$(git ls-remote --tags --exit-code --refs "https://github.com/shadowsocks/shadowsocks-rust.git" | sed -E 's/^[[:xdigit:]]+[[:space:]]+refs\/tags\/(.+)/\1/g' | tail -n1)
+        echo "Selected tag: $tag"
+        git clone --branch "$tag" --depth 1 --shallow-submodules --recurse-submodules "https://github.com/shadowsocks/shadowsocks-rust.git"
+    
+    - name: Install Rustup
+      shell: bash
+      run: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+      
+    - name: Build release
+      shell: bash
+      run: |
+        function build_target {
+          target = $1
+        }
+        
