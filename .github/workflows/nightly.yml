@@ -52,6 +52,7 @@ jobs:
     - name: Create Release
       id: create_release
       uses: actions/create-release@v1
+      if: ${{ always() }} # May have already created.
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
@@ -61,7 +62,8 @@ jobs:
         prerelease: false
         
     - name: Upload Release Asset
-      id: upload-release-asset 
+      id: upload-release-asset
+      if: ${{ always() }}
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
