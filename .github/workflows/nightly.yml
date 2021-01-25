@@ -21,7 +21,6 @@ jobs:
       run: |
         tag=$(git ls-remote --tags --exit-code --refs "https://github.com/shadowsocks/shadowsocks-rust.git" | sed -E 's/^[[:xdigit:]]+[[:space:]]+refs\/tags\/(.+)/\1/g' | tail -n1)
         echo "ss_tag=$tag" >> $GITHUB_ENV
-        echo "Selected tag: $tag"
         git clone --branch "$tag" --depth 1 --shallow-submodules --recurse-submodules "https://github.com/shadowsocks/shadowsocks-rust.git"
     
     - name: Install Rustup
@@ -40,6 +39,7 @@ jobs:
           target=$1
           save_to=$2
           rustup target add $target
+          rustup update
           pushd shadowsocks-rust
           cargo build --bin sslocal --release --target $target
           popd
@@ -49,10 +49,9 @@ jobs:
         build_target aarch64-apple-darwin ./arm64
         lipo -create -output universal_sslocal x86_64 arm64
 
-    - name: Create Release
+    - name: Create Release # May have already created.
       id: create_release
       uses: actions/create-release@v1
-      if: ${{ always() }} # May have already created.
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
@@ -63,7 +62,6 @@ jobs:
         
     - name: Upload Release Asset
       id: upload-release-asset
-      if: ${{ always() }}
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -71,5 +69,6 @@ jobs:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: ./universal_sslocal
         asset_name: sslocal
+        asset_content_type: application/x-mach-binary
 
         
