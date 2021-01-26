@@ -22,26 +22,20 @@ jobs:
         tag=$(git ls-remote --tags --exit-code --refs "https://github.com/shadowsocks/shadowsocks-rust.git" | sed -E 's/^[[:xdigit:]]+[[:space:]]+refs\/tags\/(.+)/\1/g' | tail -n1)
         echo "ss_tag=$tag" >> $GITHUB_ENV
         git clone --branch "$tag" --depth 1 --shallow-submodules --recurse-submodules "https://github.com/shadowsocks/shadowsocks-rust.git"
-    
-    - name: Install Rustup
-      shell: bash
-      run: | 
-        curl --proto '=https' --tlsv1.2 -sS https://sh.rustup.rs -o installRustUp.sh
-        sh installRustUp.sh -y
-        rustup update
       
     - name: Build release
       shell: bash
       working-directory: ${{ runner.workspace }}
       run: |
+        rustup toolchain install nightly
         # Usage: build_target [target_platform] [save_destination]
         function build_target {
           target=$1
           save_to=$2
-          rustup target add $target
+          rustup target add $target --toolchain nightly
           rustup update
           pushd shadowsocks-rust
-          cargo build --bin sslocal --release --target $target
+          cargo +nightly build --bin sslocal --release --target $target
           popd
           cp shadowsocks-rust/target/$target/release/sslocal $save_to
         }
