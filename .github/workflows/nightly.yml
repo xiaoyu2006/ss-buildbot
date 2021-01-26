@@ -27,8 +27,6 @@ jobs:
       shell: bash
       working-directory: ${{ runner.workspace }}
       run: |
-        unset CPATH
-        unset CC
         rustup toolchain install nightly
         # Usage: build_target [target_platform] [save_destination]
         function build_target {
@@ -41,13 +39,16 @@ jobs:
           popd
           cp shadowsocks-rust/target/$target/release/sslocal $save_to
         }
-        build_target x86_64-apple-darwin ./x86_64
+        # FIXME
+        # build_target x86_64-apple-darwin ./x86_64
+        export CFLAGS="-Darm64" # ??????
         build_target aarch64-apple-darwin ./arm64
         lipo -create -output universal_sslocal x86_64 arm64
 
     - name: Create Release # May have already created.
       id: create_release
       uses: actions/create-release@v1
+      if: ${{ false }} ## FIXME
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
