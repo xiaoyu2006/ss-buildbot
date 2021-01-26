@@ -41,7 +41,7 @@ jobs:
         }
         # FIXME
         # build_target x86_64-apple-darwin ./x86_64
-        export CFLAGS="-Darm64" # ??????
+        cat /Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk/usr/include/sys/cdefs.h # DEBUG
         build_target aarch64-apple-darwin ./arm64
         lipo -create -output universal_sslocal x86_64 arm64
 
