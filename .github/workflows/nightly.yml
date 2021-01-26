@@ -27,6 +27,8 @@ jobs:
       shell: bash
       working-directory: ${{ runner.workspace }}
       run: |
+        unset CPATH
+        unset CC
         rustup toolchain install nightly
         # Usage: build_target [target_platform] [save_destination]
         function build_target {
