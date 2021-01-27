@@ -27,15 +27,14 @@ jobs:
       shell: bash
       working-directory: ${{ runner.workspace }}
       run: |
-        rustup toolchain install nightly
         # Usage: build_target [target_platform] [save_destination]
         function build_target {
           target=$1
           save_to=$2
-          rustup target add $target --toolchain nightly
+          rustup target add $target --toolchain stable
           rustup update
           pushd shadowsocks-rust
-          cargo +nightly build --bin sslocal --release --target $target
+          cargo +stable build --bin sslocal --release --target $target
           popd
           cp shadowsocks-rust/target/$target/release/sslocal $save_to
         }
