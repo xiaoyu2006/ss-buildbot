@@ -41,14 +41,13 @@ jobs:
         }
         # FIXME
         # build_target x86_64-apple-darwin ./x86_64
-        cat /Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk/usr/include/sys/cdefs.h # DEBUG
+        export CFLAGS='-Dx86_64'
         build_target aarch64-apple-darwin ./arm64
         lipo -create -output universal_sslocal x86_64 arm64
 
     - name: Create Release # May have already created.
       id: create_release
       uses: actions/create-release@v1
-      if: ${{ false }} ## FIXME
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
