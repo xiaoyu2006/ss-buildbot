@@ -31,16 +31,16 @@ jobs:
         function build_target {
           target=$1
           save_to=$2
-          rustup target add $target --toolchain stable
+          rustup target add $target --toolchain nightly
           rustup update
           pushd shadowsocks-rust
-          cargo +stable build --bin sslocal --release --target $target
+          cargo +nightly build --bin sslocal --release --target $target
           popd
           cp shadowsocks-rust/target/$target/release/sslocal $save_to
         }
         # FIXME
         # build_target x86_64-apple-darwin ./x86_64
-        export CFLAGS='-Dx86_64'
+        export CFLAGS='-Di386'
         build_target aarch64-apple-darwin ./arm64
         lipo -create -output universal_sslocal x86_64 arm64
 
