@@ -41,7 +41,7 @@ jobs:
         }
         # FIXME
         # build_target x86_64-apple-darwin ./x86_64
-        export CFLAGS='-Di386'
+        export CFLAGS='-D__x86_64__'
         build_target aarch64-apple-darwin ./arm64
         lipo -create -output universal_sslocal x86_64 arm64
 
