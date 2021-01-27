@@ -27,6 +27,7 @@ jobs:
       shell: bash
       working-directory: ${{ runner.workspace }}
       run: |
+        rustup toolchain install nightly
         # Usage: build_target [target_platform] [save_destination]
         function build_target {
           target=$1
