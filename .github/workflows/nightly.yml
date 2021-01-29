@@ -15,7 +15,6 @@ jobs:
   compile:
     name: Compile
     runs-on: 'macos-10.15'
-
     steps:
 
     - name: Download Shadowsocks-Rust latest tag
@@ -26,7 +25,16 @@ jobs:
         tag=$(git ls-remote --tags --exit-code --refs "https://github.com/shadowsocks/shadowsocks-rust.git" | sed -E 's/^[[:xdigit:]]+[[:space:]]+refs\/tags\/(.+)/\1/g' | tail -n1)
         echo "ss_tag=$tag" >> $GITHUB_ENV
         git clone --branch "$tag" --depth 1 --shallow-submodules --recurse-submodules "https://github.com/shadowsocks/shadowsocks-rust.git"
-      
+  
+    - name: Setup cache
+      uses: actions/cache@v2
+      with:
+        path: |
+          ~/.cargo/registry
+          ~/.cargo/git
+          ${{ runner.workspace }}/shadowsocks-rust/target
+        key: ${{ runner.os }}-cargo-${{ env.ss_tag }}
+
     - name: Build release
       shell: bash
       working-directory: ${{ runner.workspace }}
@@ -47,16 +55,6 @@ jobs:
         build_target x86_64-apple-darwin ./x86_64
         build_target aarch64-apple-darwin ./arm64
         lipo -create -output sslocal x86_64 arm64
-        
-    - name: Setup cache
-      uses: actions/cache@v2
-      with:
-        path: |
-          ~/.cargo/registry
-          ~/.cargo/git
-          ${{ runner.workspace }}/shadowsocks-rust/target
-        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-
 
     - name: Create release
       id: create_release
