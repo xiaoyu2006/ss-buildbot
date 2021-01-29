@@ -27,7 +27,7 @@ jobs:
       shell: bash
       working-directory: ${{ runner.workspace }}
       run: |
-        sudo xcode-select -s "/Applications/Xcode_12.3.app"
+        sudo rm -Rf /Library/Developer/CommandLineTools/SDKs/*
         rustup toolchain install nightly
         # Usage: build_target [target_platform] [save_destination]
         function build_target {
@@ -41,7 +41,7 @@ jobs:
           cp shadowsocks-rust/target/$target/release/sslocal $save_to
         }
         build_target x86_64-apple-darwin ./x86_64
-        build_target aarch64-apple-darwin ./arm64  # FIXME
+        build_target aarch64-apple-darwin ./arm64
         lipo -create -output universal_sslocal x86_64 arm64
 
     - name: Create Release # May have already created.
@@ -62,7 +62,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./universal_sslocal
-        asset_name: sslocal
+        asset_path: ${{ runner.workspace }}/universal_sslocal
+        asset_name: universal_sslocal
         asset_content_type: application/x-mach-binary
 
