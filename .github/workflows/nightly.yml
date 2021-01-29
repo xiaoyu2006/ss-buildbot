@@ -65,7 +65,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         tag_name: ${{ env.ss_tag }}
-        release_name: Release ${{ env.ss_tag }}
+        release_name: ${{ env.ss_tag }}
         draft: false
         prerelease: false
         
