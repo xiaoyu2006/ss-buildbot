@@ -25,15 +25,6 @@ jobs:
         tag=$(git ls-remote --tags --exit-code --refs "https://github.com/shadowsocks/shadowsocks-rust.git" | sed -E 's/^[[:xdigit:]]+[[:space:]]+refs\/tags\/(.+)/\1/g' | tail -n1)
         echo "ss_tag=$tag" >> $GITHUB_ENV
         git clone --branch "$tag" --depth 1 --shallow-submodules --recurse-submodules "https://github.com/shadowsocks/shadowsocks-rust.git"
-  
-    - name: Setup cache
-      uses: actions/cache@v2
-      with:
-        path: |
-          ~/.cargo/registry
-          ~/.cargo/git
-          ${{ runner.workspace }}/shadowsocks-rust/target
-        key: ${{ runner.os }}-cargo-${{ env.ss_tag }}
 
     - name: Build release
       shell: bash
