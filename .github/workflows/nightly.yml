@@ -7,6 +7,10 @@ on:
   schedule:
     - cron:  '0 0 * * *'
 
+env:
+  CARGO_TERM_COLOR: always
+
+
 jobs:
   compile:
     name: Compile
@@ -44,6 +48,16 @@ jobs:
         build_target aarch64-apple-darwin ./arm64
         lipo -create -output sslocal x86_64 arm64
         chmod +x sslocal
+        
+    - name: Setup Cache
+      uses: actions/cache@v2
+      with:
+        path: |
+          ~/.cargo/registry
+          ~/.cargo/git
+          shadowsocks-rust/target
+        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+
 
     - name: Create Release
       id: create_release
