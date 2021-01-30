@@ -70,5 +70,5 @@ jobs:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: ${{ runner.workspace }}/sslocal
         asset_name: sslocal
-        asset_content_type: application/x-mach-binary
+        asset_content_type: application/octet-stream
 
